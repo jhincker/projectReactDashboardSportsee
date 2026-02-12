@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUsers } from "../../context/usersContext";
+import { useUser } from "../../context/UserContext";
 
 export default function UserForm() {
-  const { loginUser, getUserInfo, loading, error } = useUsers();
+  const { loginUser, getUserInfo, loading, error } = useUser();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

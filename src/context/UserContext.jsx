@@ -1,4 +1,4 @@
-// src/UsersContext.jsx (variante)
+// src/UserContext.jsx (variante)
 import {
   createContext,
   useContext,
@@ -7,12 +7,13 @@ import {
   useCallback,
 } from "react";
 
-const UsersContext = createContext(null);
+const UserContext = createContext(null);
 
-export function UsersProvider({ children }) {
-  const [users, setUsers] = useState([]);
+export function UserProvider({ children }) {
+  const [user, setUser] = useState([]);
   const [userStats, setUserStats] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [userActivity, setUserActivity] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [token, setToken] = useState(() =>
@@ -35,7 +36,7 @@ export function UsersProvider({ children }) {
       if (!res.ok) throw new Error("Erreur POST " + res.status);
       const created = await res.json();
       // Optimiste : ajoute localement
-      setUsers((prev) => [created, ...prev]);
+      setUser((prev) => [created, ...prev]);
       // Store token/userId if provided
       if (created && created.token) {
         setToken(created.token);
@@ -75,7 +76,7 @@ export function UsersProvider({ children }) {
         if (!res.ok) throw new Error("Erreur getUserInfo " + res.status);
         const userInfo = await res.json();
         // Update local state
-        setUsers((prev) => [userInfo, ...prev]);
+        setUser((prev) => [userInfo, ...prev]);
         if (userInfo && userInfo.profile) {
           setUserStats(userInfo.statistics ?? null);
           setUserProfile(userInfo.profile ?? null);
@@ -99,6 +100,53 @@ export function UsersProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  const getUserActivity = useCallback(
+    async (tokenArg, { startWeek, endWeek } = {}) => {
+      const usedToken = tokenArg ?? token;
+      if (!usedToken) return null;
+
+      const params = new URLSearchParams();
+      if (startWeek) params.append("startWeek", startWeek);
+      if (endWeek) params.append("endWeek", endWeek);
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await fetch(
+          `http://localhost:8000/api/user-activity?${params.toString()}`,
+          {
+            headers: {
+              Authorization: `Bearer ${usedToken}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!res.ok) throw new Error("Erreur getUserActivity " + res.status);
+
+        const data = await res.json();
+        setUserActivity(data ?? []);
+        return data;
+      } catch (e) {
+        setError(e.message);
+        throw e;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token],
+  );
+
+  useEffect(() => {
+    if (token) {
+      getUserActivity(token, {
+        startWeek: "2025-05-28",
+        endWeek: "2025-06-25",
+      }).catch(() => {});
+    }
+  }, [token, getUserActivity]);
+
   const logout = () => {
     setToken(null);
     setUserId(null);
@@ -115,26 +163,26 @@ export function UsersProvider({ children }) {
   });
 
   const value = {
-    users,
+    user,
     userStats,
     userProfile,
+    userActivity,
     loading,
     error,
     loginUser,
     getUserInfo,
+    getUserActivity,
     token,
     userId,
     logout,
     dateFormatter,
   };
 
-  return (
-    <UsersContext.Provider value={value}>{children}</UsersContext.Provider>
-  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
 
-export function useUsers() {
-  const ctx = useContext(UsersContext);
-  if (!ctx) throw new Error("useUsers dans UsersProvider");
+export function useUser() {
+  const ctx = useContext(UserContext);
+  if (!ctx) throw new Error("useUser dans UserProvider");
   return ctx;
 }

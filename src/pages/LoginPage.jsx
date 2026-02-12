@@ -3,10 +3,10 @@
 import Logo from "../images/Logo.svg";
 import login from "../images/login.jpg";
 import UserForm from "../components/auth/UserForm.jsx";
-import { useUsers } from "../context/usersContext.jsx";
+import { useUser } from "../context/UserContext.jsx";
 
 const LoginPage = () => {
-  const { users, loading, error } = useUsers();
+  const { user, loading, error } = useUser();
   return (
     <>
       <div className="inter grid grid-cols-[2fr_3fr] ">
