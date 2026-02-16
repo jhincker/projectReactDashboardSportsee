@@ -147,9 +147,17 @@ export function UserProvider({ children }) {
     }
   }, [token, getUserActivity]);
 
+  // Déconnexion auto si API renvoie 401
+  useEffect(() => {
+    if (error === "Unauthorized") {
+      logout();
+    }
+  }, [error]);
+
   const logout = () => {
     setToken(null);
     setUserId(null);
+    setUser(null);
     try {
       localStorage.removeItem("token");
       localStorage.removeItem("userId");

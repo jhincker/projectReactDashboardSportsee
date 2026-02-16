@@ -29,14 +29,6 @@ export default function WeeklyRunningChart() {
 
   const activityList = Array.isArray(userActivity) ? userActivity : [];
 
-  if (activityList.length === 0) {
-    return (
-      <div className="bg-white rounded-[16px] p-6">
-        <p className="text-gray-400">Aucune activité disponible</p>
-      </div>
-    );
-  }
-
   // 1️⃣ Buckets S1 → S4
   const weeklyBuckets = {
     S1: 0,
@@ -90,6 +82,7 @@ export default function WeeklyRunningChart() {
     plugins: {
       legend: {
         position: "bottom",
+        align: "start",
         labels: {
           usePointStyle: true,
           pointStyle: "circle",
@@ -127,16 +120,17 @@ export default function WeeklyRunningChart() {
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-4">
           <button
             onClick={prevPeriod}
-            className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100"
+            className="w-8 h-8 rounded-full border flex items-center justify-center"
           >
             ←
           </button>
+          <span className="text-sm text-gray-600">{periodLabel}</span>
           <button
             onClick={nextPeriod}
-            className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100"
+            className="w-8 h-8 rounded-full border flex items-center justify-center"
           >
             →
           </button>
