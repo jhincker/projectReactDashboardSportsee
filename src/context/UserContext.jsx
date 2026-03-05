@@ -157,7 +157,7 @@ export function UserProvider({ children }) {
   const logout = () => {
     setToken(null);
     setUserId(null);
-    setUser(null);
+    setUser([]);
     try {
       localStorage.removeItem("token");
       localStorage.removeItem("userId");
